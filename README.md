@@ -30,6 +30,7 @@ cp .env.example .env
 npm install
 npm run db:up        # Postgres (localhost:54330) + Mailpit (http://localhost:8125)
 npm run db:migrate
+npm run db:seed      # compte de démo de l'app iOS : demo@pawrise.fr / pawrise2026
 npm run dev          # http://localhost:8200
 ```
 

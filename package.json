@@ -20,7 +20,8 @@
     "test": "jest --config jest.config.ts --selectProjects unit",
     "test:e2e": "jest --config jest.config.ts --selectProjects e2e --runInBand",
     "test:all": "jest --config jest.config.ts --runInBand",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "db:seed": "node scripts/seed-demo.mjs"
   },
   "dependencies": {
     "@nestjs/common": "11.1.9",
