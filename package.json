@@ -1,0 +1,60 @@
+{
+  "name": "pawrise-auth",
+  "version": "0.1.0",
+  "description": "Service d'authentification Pawrise (NestJS) : comptes e-mail, Apple, Google, JWT RS256, base dédiée",
+  "private": true,
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "nest build",
+    "start": "node dist/main.js",
+    "dev": "nest start --watch",
+    "lint": "eslint \"{src,test}/**/*.ts\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "db:up": "docker compose up -d postgres mailpit",
+    "db:migrate": "prisma migrate deploy",
+    "prisma:generate": "prisma generate",
+    "test": "jest --config jest.config.ts --selectProjects unit",
+    "test:e2e": "jest --config jest.config.ts --selectProjects e2e --runInBand",
+    "test:all": "jest --config jest.config.ts --runInBand",
+    "postinstall": "prisma generate",
+    "db:seed": "node scripts/seed-demo.mjs"
+  },
+  "dependencies": {
+    "@nestjs/common": "11.1.9",
+    "@nestjs/core": "11.1.9",
+    "@nestjs/platform-express": "11.1.9",
+    "@nestjs/throttler": "6.4.0",
+    "@prisma/client": "6.19.3",
+    "argon2": "0.44.0",
+    "class-transformer": "0.5.1",
+    "class-validator": "0.14.2",
+    "jose": "6.1.0",
+    "nodemailer": "7.0.10",
+    "prisma": "6.19.3",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2",
+    "zod": "4.1.12"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.38.0",
+    "@nestjs/cli": "11.0.10",
+    "@nestjs/testing": "11.1.9",
+    "@types/express": "5.0.5",
+    "@types/jest": "30.0.0",
+    "@types/node": "22.18.12",
+    "@types/nodemailer": "7.0.3",
+    "@types/supertest": "6.0.3",
+    "eslint": "9.38.0",
+    "jest": "30.2.0",
+    "prettier": "3.6.2",
+    "supertest": "7.1.4",
+    "ts-jest": "29.4.5",
+    "ts-node": "10.9.2",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.46.2"
+  }
+}

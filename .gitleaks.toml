@@ -1,0 +1,15 @@
+# Lu par gitleaks (workflow partagé Pawrise/.github secret-scan.yml) : règles par défaut + exceptions.
+title = "pawrise-auth"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Mots de passe et jetons fictifs des tests et de l'exemple du README"
+paths = [
+  '''^test/''',
+  '''^src/.*\.spec\.ts$''',
+]
+regexes = [
+  '''chien-oslo-2026''',
+]

@@ -1,0 +1,105 @@
+// Décrit la base créée par prisma/migrations (source du schéma, approche base d'abord).
+// Noms de l'API en camelCase, colonnes en snake_case via @map (convention 3 de pawrise-doc).
+// Les index partiels et sur expression (lower(email), consentement actif) n'existent que dans le SQL.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model UserAccount {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @map("id_user") @db.Uuid
+  email               String    @db.VarChar(255)
+  passwordHash        String?   @map("password_hash") @db.VarChar(255)
+  firstName           String    @map("first_name") @db.VarChar(100)
+  lastName            String    @map("last_name") @db.VarChar(100)
+  phoneNumber         String?   @map("phone_number") @db.VarChar(20)
+  emailVerifiedAt     DateTime? @map("email_verified_at") @db.Timestamptz(6)
+  registeredAt        DateTime  @default(now()) @map("registration_date") @db.Timestamptz(6)
+  locationSharing     Boolean   @default(true) @map("location_sharing")
+  healthNotifications Boolean   @default(true) @map("health_notifications")
+  tokenVersion        Int       @default(0) @map("token_version")
+
+  consents      Consent[]
+  refreshTokens RefreshToken[]
+  identities    UserIdentity[]
+  emailTokens   EmailToken[]
+
+  @@map("user_account")
+}
+
+model Consent {
+  userId    String    @map("id_user") @db.Uuid
+  type      String    @map("consent_type") @db.VarChar(30)
+  grantedAt DateTime  @default(now()) @map("consent_granted_at") @db.Timestamptz(6)
+  version   String    @map("consent_version") @db.VarChar(20)
+  revokedAt DateTime? @map("consent_revoked_at") @db.Timestamptz(6)
+
+  user UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, type, grantedAt])
+  @@map("consent")
+}
+
+model RefreshToken {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @map("id_refresh_token") @db.Uuid
+  tokenHash String    @unique @map("token_hash") @db.VarChar(255)
+  familyId  String    @map("family_id") @db.Uuid
+  issuedAt  DateTime  @default(now()) @map("issued_at") @db.Timestamptz(6)
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(6)
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(6)
+  revokedAt DateTime? @map("revoked_at") @db.Timestamptz(6)
+  userId    String    @map("id_user") @db.Uuid
+
+  user UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([familyId], map: "ix_refresh_token_family")
+  @@index([userId], map: "ix_refresh_token_user")
+  @@map("refresh_token")
+}
+
+model UserIdentity {
+  provider String   @db.VarChar(10)
+  subject  String   @db.VarChar(255)
+  email    String?  @db.VarChar(255)
+  linkedAt DateTime @default(now()) @map("linked_at") @db.Timestamptz(6)
+  userId   String   @map("id_user") @db.Uuid
+
+  user UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, subject])
+  @@index([userId], map: "ix_user_identity_user")
+  @@map("user_identity")
+}
+
+model EmailToken {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @map("id_email_token") @db.Uuid
+  purpose   String    @db.VarChar(20)
+  tokenHash String    @unique @map("token_hash") @db.VarChar(255)
+  email     String    @db.VarChar(255)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(6)
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(6)
+  attempts  Int       @default(0)
+  userId    String    @map("id_user") @db.Uuid
+
+  user UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, purpose], map: "ix_email_token_user_purpose")
+  @@map("email_token")
+}
+
+model LoginAttempt {
+  id          BigInt   @id @default(autoincrement()) @map("id_login_attempt")
+  email       String   @db.VarChar(255)
+  ipAddress   String?  @map("ip_address") @db.VarChar(45)
+  succeeded   Boolean
+  attemptedAt DateTime @default(now()) @map("attempted_at") @db.Timestamptz(6)
+
+  @@index([email, attemptedAt(sort: Desc)], map: "ix_login_attempt_email_time")
+  @@map("login_attempt")
+}

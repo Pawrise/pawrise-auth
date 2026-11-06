@@ -1,0 +1,39 @@
+# Dépendances locales du service. `npm run db:up` lance Postgres et Mailpit.
+services:
+  postgres:
+    image: postgres:17-alpine # même version majeure que Neon
+    environment:
+      POSTGRES_USER: pawrise_auth
+      POSTGRES_PASSWORD: pawrise_auth
+      POSTGRES_DB: pawrise_auth
+    ports:
+      - "54330:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./scripts/create-test-db.sql:/docker-entrypoint-initdb.d/create-test-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pawrise_auth"]
+      interval: 2s
+      retries: 20
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "1125:1025" # SMTP
+      - "8125:8025" # boîte de réception : http://localhost:8125
+
+  auth:
+    build: .
+    profiles: [app]
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://pawrise_auth:pawrise_auth@postgres:5432/pawrise_auth
+      SMTP_URL: smtp://mailpit:1025
+    ports:
+      - "8200:8200"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:
